@@ -4,7 +4,7 @@ public struct CelesTrakSyslog:CustomStringConvertible {
     let log:CelesTrakError
     let message:String
     
-    init( log: CelesTrakError, message: String) {
+    public init( log: CelesTrakError, message: String) {
         self.log = log
                   self.message = message
     }
@@ -30,7 +30,7 @@ public class SwiftCelesTrak:NSObject {
     private var expectedContentLength:Int?
     private var sysLog:[String:CelesTrakSyslog]!
     
-    override init() {
+    public override init() {
         self.targets = [String: CelesTrakTarget]()
         self.buffer = 0
     }

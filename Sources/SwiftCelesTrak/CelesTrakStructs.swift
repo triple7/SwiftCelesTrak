@@ -31,6 +31,11 @@ public struct CelesTrakTarget:Decodable {
     let MEAN_MOTION_DDOT:Float
 
     init( data: [String]) {
+        /** Initializer for csv format process
+         Parameters:
+         * data: [String]
+        
+         */
         self.OBJECT_NAME = data[0]
         self.OBJECT_ID = data[1]
         self.EPOCH = data[2]
