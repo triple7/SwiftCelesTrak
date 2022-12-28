@@ -40,7 +40,7 @@ public class SwiftCelesTrak:NSObject {
 
  extension SwiftCelesTrak: URLSessionDelegate {
 
-     public func getBatchGroupTargets( groups: inout [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON) {
+     public func getBatchGroupTargets( groups: inout [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON, _ closure: @escaping (Bool)-> Void) {
          let serialGroup = DispatchGroup()
          while !groups.isEmpty {
              let group = groups.removeFirst()
@@ -51,6 +51,7 @@ public class SwiftCelesTrak:NSObject {
          }
          serialGroup.notify(queue: .main) {
              print("Download complete")
+             closure(true)
          }
      }
      
@@ -98,7 +99,6 @@ public class SwiftCelesTrak:NSObject {
                      return
              }
              for gp in gps {
-                 print(gp.OBJECT_ID)
                  self?.targets[gp.OBJECT_ID] = gp
                  self?.sysLog[gp.OBJECT_ID] = CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded")
              }
