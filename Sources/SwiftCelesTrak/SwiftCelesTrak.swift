@@ -39,17 +39,16 @@ public class SwiftCelesTrak:NSObject {
 
  extension SwiftCelesTrak: URLSessionDelegate {
 
-     public func getBatchGroupTargets( groups: inout [String], returnFormat: CelesTrakFormat = .JSON) {
+     public func getBatchGroupTargets( groups: inout [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON) {
          let serialGroup = DispatchGroup()
          while !groups.isEmpty {
-             let groupName = groups.removeFirst()
+             let group = groups.removeFirst()
              serialGroup.enter()
-             getGroup(groupName: groupName, returnFormat: returnFormat, { success in
+             getGroup(groupName: group.rawValue, returnFormat: returnFormat, { success in
                  serialGroup.leave()
              })
          }
          serialGroup.notify(queue: .main) {
-             
          }
      }
      
