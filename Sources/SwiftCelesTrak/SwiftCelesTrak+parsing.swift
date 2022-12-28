@@ -9,13 +9,13 @@ import Foundation
 
 extension SwiftCelesTrak {
 
-    internal func parseCsv(text: String)->[CelesTrakTarget] {
+public func parseCsv(text: String)->[CelesTrakTarget] {
         var gps = text.components(separatedBy: "\n")
         _ = gps.removeFirst()
         return gps.map{ CelesTrakTarget(data: $0.components(separatedBy: ","))}
     }
 
-    internal func parseXml(data: Data)->[CelesTrakTarget] {
+    public func parseXml(data: Data)->[CelesTrakTarget] {
         let parser = XMLParser(data: data)
         parser.delegate = self
         if parser.parse() {

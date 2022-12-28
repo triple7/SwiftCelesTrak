@@ -24,11 +24,11 @@ public class SwiftCelesTrak:NSObject {
      * progress: progress in percentage of download for a target set
      * expectedContentLength: size in kbytes of data
      */
-    private var targets:[String: CelesTrakTarget]
+    public var targets:[String: CelesTrakTarget]
     private var buffer:Int!
-    private var progress:Float?
+    public var progress:Float?
     private var expectedContentLength:Int?
-    private var sysLog:[String:CelesTrakSyslog]!
+    public var sysLog:[String:CelesTrakSyslog]!
     
     public override init() {
         self.targets = [String: CelesTrakTarget]()
@@ -39,7 +39,7 @@ public class SwiftCelesTrak:NSObject {
 
  extension SwiftCelesTrak: URLSessionDelegate {
 
-     func getBatchGroupTargets( groups: inout [String], returnFormat: CelesTrakFormat = .JSON) {
+     public func getBatchGroupTargets( groups: inout [String], returnFormat: CelesTrakFormat = .JSON) {
          let serialGroup = DispatchGroup()
          while !groups.isEmpty {
              let groupName = groups.removeFirst()
@@ -53,7 +53,7 @@ public class SwiftCelesTrak:NSObject {
          }
      }
      
-     func getGroup(groupName: String, returnFormat: CelesTrakFormat, _ closure: @escaping (Bool)-> Void) {
+     public func getGroup(groupName: String, returnFormat: CelesTrakFormat, _ closure: @escaping (Bool)-> Void) {
          /** Gets a single group
           Adds a set of targets into the targets dictionary and adds a response type for further processing
           Params:
@@ -105,11 +105,11 @@ public class SwiftCelesTrak:NSObject {
      task.resume()
      }
 
-     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
          expectedContentLength = Int(response.expectedContentLength)
      }
      
-     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
          buffer += data.count
          let percentageDownloaded = Float(buffer) / Float(expectedContentLength!)
             progress =  percentageDownloaded
