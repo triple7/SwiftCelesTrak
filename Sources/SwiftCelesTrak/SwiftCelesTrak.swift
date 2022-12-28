@@ -87,8 +87,8 @@ public class SwiftCelesTrak:NSObject {
              var gps:[CelesTrakTarget]
              switch returnFormat {
              case .JSON, .JSON_PRETTY:
-                 print("json format")
                  gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
+                 print(gps)
              case .CSV:
                  let text = String(decoding: data!, as: UTF8.self)
                  gps = self!.parseCsv(text: text)
