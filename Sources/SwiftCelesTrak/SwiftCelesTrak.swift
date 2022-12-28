@@ -28,7 +28,7 @@ public class SwiftCelesTrak:NSObject {
     private var buffer:Int!
     public var progress:Float?
     private var expectedContentLength:Int?
-    public var sysLog:[String:CelesTrakSyslog]!
+    public var sysLog:[String:CelesTrakSyslog]
     
     public override init() {
         self.targets = [String: CelesTrakTarget]()
@@ -87,6 +87,7 @@ public class SwiftCelesTrak:NSObject {
              var gps:[CelesTrakTarget]
              switch returnFormat {
              case .JSON, .JSON_PRETTY:
+                 print("json format")
                  gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
              case .CSV:
                  let text = String(decoding: data!, as: UTF8.self)
