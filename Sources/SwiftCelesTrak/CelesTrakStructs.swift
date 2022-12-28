@@ -26,7 +26,7 @@ public struct CelesTrakTarget:Decodable {
     let NORAD_CAT_ID:Int
     let ELEMENT_SET_NO:Int
     let REV_AT_EPOCH:Int
-    let BSTAR:Int?
+    var BSTAR:Int?
     let MEAN_MOTION_DOT:Float
     let MEAN_MOTION_DDOT:Float
 
