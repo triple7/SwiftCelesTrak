@@ -80,8 +80,11 @@ public class SwiftCelesTrak:NSObject {
                  let error = NSError(domain: "com.error", code: response.statusCode)
                  self?.sysLog[groupName] = CelesTrakSyslog(log: .RequestError, message: error.localizedDescription)
                  closure(false)
+                 return
              }
 
+             let testText = String(decoding: data!, as: UTF8.self)
+print(testText)
              var gps:[CelesTrakTarget]
              switch returnFormat {
              case .JSON, .JSON_PRETTY:
