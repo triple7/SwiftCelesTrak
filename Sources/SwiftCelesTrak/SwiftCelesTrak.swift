@@ -1,10 +1,15 @@
 import Foundation
 
 public struct CelesTrakSyslog:CustomStringConvertible {
+    let timecode:String
     let log:CelesTrakError
     let message:String
     
     public init( log: CelesTrakError, message: String) {
+        let date = Date()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy--MM-dd hh:mm:ss"
+        self.timecode = dateFormatter.string(from: date)
         self.log = log
                   self.message = message
     }
@@ -28,12 +33,12 @@ public class SwiftCelesTrak:NSObject {
     private var buffer:Int!
     public var progress:Float?
     private var expectedContentLength:Int?
-    public var sysLog:[String:CelesTrakSyslog]
+    public var sysLog:[CelesTrakSyslog]
     
     public override init() {
         self.targets = [String: CelesTrakTarget]()
         self.buffer = 0
-        self.sysLog = [String: CelesTrakSyslog]()
+        self.sysLog = [ CelesTrakSyslog]()
     }
     
 }
@@ -50,7 +55,6 @@ public class SwiftCelesTrak:NSObject {
              })
          }
          serialGroup.notify(queue: .main) {
-             print("Download complete")
              closure(true)
          }
      }
@@ -70,18 +74,18 @@ public class SwiftCelesTrak:NSObject {
          
          let task = session.dataTask(with: target.getURL(objectType: .GROUP, returnFormat: returnFormat)) { [weak self] data, response, error in
              if error != nil {
-                 self?.sysLog[groupName] = CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription)
+                 self?.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
                  closure(false)
                  return
              }
              guard let response = response as? HTTPURLResponse else {
-                 self?.sysLog[groupName] = CelesTrakSyslog(log: .RequestError, message: "response timed out")
+                 self?.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out"))
                  closure(false)
                  return
              }
              if response.statusCode != 200 {
                  let error = NSError(domain: "com.error", code: response.statusCode)
-                 self?.sysLog[groupName] = CelesTrakSyslog(log: .RequestError, message: error.localizedDescription)
+                 self?.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
                  closure(false)
                  return
              }
@@ -94,13 +98,13 @@ public class SwiftCelesTrak:NSObject {
                  let text = String(decoding: data!, as: UTF8.self)
                  gps = self!.parseCsv(text: text)
              default:
-                 self?.sysLog["unavailable"] = CelesTrakSyslog(log: .RequestError, message: "type not available")
+                 self?.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
                  closure(false)
                      return
              }
              for gp in gps {
                  self?.targets[gp.OBJECT_ID] = gp
-                 self?.sysLog[gp.OBJECT_ID] = CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded")
+                 self?.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
              }
          closure(true)
              return
