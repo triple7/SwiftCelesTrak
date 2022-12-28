@@ -17,3 +17,26 @@ SwiftCelesTrak wraps the set of standard http request parameters to retrieve GP 
 
 Other formats such as TLE are not implemented as they are legacy data formats and CelesTrak is futureproof with the transition of the TLE data format to the new OMM catalog format which allows for identification integers upwards of 99,999 which the TLE format lacks.
 
+## Usage
+
+    import SwiftCelesTrak
+    
+    let celsTrak = SwiftCelesTrak()
+    var GPGroups:[CelesTrakGroup] = [
+        .active,
+        .intelsat,
+        .amateur,
+       .cubesat
+        ]
+    
+    let start = CACurrentMediaTime()
+    celsTrak.getBatchGroupTargets(groups: &GPGroups, returnFormat: .JSON, { success in
+        let end = CACurrentMediaTime()
+        let count = self.celsTrak.targets.keys.count
+        print("Batch of \(count) targets downloaded in \(end-start) seconds")
+    })
+
+## Credits
+
+credits due to Dr. T.S Kelso for this awesome non for profit endeavour, and please donate to him if you can through his [website](https://celestrak.org)
+

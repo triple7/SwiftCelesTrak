@@ -51,7 +51,6 @@ public class SwiftCelesTrak:NSObject {
              let group = groups.removeFirst()
              serialGroup.enter()
              getGroup(groupName: group.rawValue, returnFormat: returnFormat, { success in
-                 print("Finished \(group.rawValue)")
                  serialGroup.leave()
              })
          }
