@@ -33,6 +33,7 @@ public class SwiftCelesTrak:NSObject {
     public override init() {
         self.targets = [String: CelesTrakTarget]()
         self.buffer = 0
+        self.sysLog = [String: CelesTrakSyslog]()
     }
     
 }
@@ -83,8 +84,6 @@ public class SwiftCelesTrak:NSObject {
                  return
              }
 
-             let testText = String(decoding: data!, as: UTF8.self)
-print(testText)
              var gps:[CelesTrakTarget]
              switch returnFormat {
              case .JSON, .JSON_PRETTY:
