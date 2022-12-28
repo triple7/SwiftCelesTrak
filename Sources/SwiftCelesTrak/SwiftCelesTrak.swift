@@ -50,6 +50,7 @@ public class SwiftCelesTrak:NSObject {
              })
          }
          serialGroup.notify(queue: .main) {
+             print("Download complete")
          }
      }
      
@@ -88,7 +89,6 @@ public class SwiftCelesTrak:NSObject {
              switch returnFormat {
              case .JSON, .JSON_PRETTY:
                  gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
-                 print(gps)
              case .CSV:
                  let text = String(decoding: data!, as: UTF8.self)
                  gps = self!.parseCsv(text: text)
@@ -98,6 +98,7 @@ public class SwiftCelesTrak:NSObject {
                      return
              }
              for gp in gps {
+                 print(gp.OBJECT_ID)
                  self?.targets[gp.OBJECT_ID] = gp
                  self?.sysLog[gp.OBJECT_ID] = CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded")
              }
