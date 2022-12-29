@@ -46,16 +46,48 @@ public class SwiftCelesTrak:NSObject {
  extension SwiftCelesTrak: URLSessionDelegate {
 
      public func getBatchGroupTargets( groups: inout [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON, _ closure: @escaping (Bool)-> Void) {
-         let serialGroup = DispatchGroup()
+         let queue = OperationQueue()
+         queue.maxConcurrentOperationCount = 1
+         
          while !groups.isEmpty {
-             let group = groups.removeFirst()
-             serialGroup.enter()
-             getGroup(groupName: group.rawValue, returnFormat: returnFormat, { success in
-                 serialGroup.leave()
-             })
-         }
-         serialGroup.notify(queue: .main) {
+             let groupName = groups.removeFirst()
+             let request = CelesTrakRequest(target: groupName.id)
+             let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: request.getURL(objectType: .GROUP, returnFormat: returnFormat), completionHandler: { (data, response, error) in
+                 if error != nil {
+                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
+                     closure(false)
+                     return
+                 }
+                 guard let response = response as? HTTPURLResponse else {
+                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out"))
+                     closure(false)
+                     return
+                 }
+                 if response.statusCode != 200 {
+                     let error = NSError(domain: "com.error", code: response.statusCode)
+                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
+                     closure(false)
+                 }
+
+                 var gps:[CelesTrakTarget]
+                 switch returnFormat {
+                 case .JSON, .JSON_PRETTY:
+                     gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
+                 case .CSV:
+                     let text = String(decoding: data!, as: UTF8.self)
+                     gps = self.parseCsv(text: text)
+                 default:
+                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
+                     closure(false)
+                         return
+                 }
+                 for gp in gps {
+                     self.targets[gp.OBJECT_ID] = gp
+                     self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
+                 }
              closure(true)
+             })
+             queue.addOperation(operation)
          }
      }
      

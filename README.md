@@ -8,6 +8,8 @@ The US government has provided GP or general perturbations orbital data to the r
 
 The CelesTrak API allows for an updated [CCSDS 502.0-B-2](https://public.ccsds.org/Pubs/502x0b2c1e2.pdf) standard compliant GP data standard developed by [The Consultative Committee for Space Data Systems (CCSDS)](https://public.ccsds.org/default.aspx) to monitor over 100,000 objects in current low to high earth orbit.
 
+This package is used for the [AstreOS](https://astreos.space) platform developed by Yuma Antoine Decaux.
+
 ## Standard http requests 
 
 SwiftCelesTrak wraps the set of standard http request parameters to retrieve GP data in various formats such as:
