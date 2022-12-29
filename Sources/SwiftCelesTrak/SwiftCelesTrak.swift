@@ -49,8 +49,9 @@ public class SwiftCelesTrak:NSObject {
          let queue = OperationQueue()
          queue.maxConcurrentOperationCount = 1
          
-         while !groups.isEmpty {
-             let groupName = groups.removeFirst()
+         var requestCount = groups.count
+         var isComplete = false
+         for groupName in groups {
              let request = CelesTrakRequest(target: groupName.id)
              let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: request.getURL(objectType: .GROUP, returnFormat: returnFormat), completionHandler: { (data, response, error) in
                  if error != nil {
@@ -85,10 +86,17 @@ public class SwiftCelesTrak:NSObject {
                      self.targets[gp.OBJECT_ID] = gp
                      self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
                  }
-             closure(true)
+                 requestCount -= 1
+                 if requestCount == 0 {
+                     isComplete = true
+                 }
              })
              queue.addOperation(operation)
          }
+         while !isComplete {
+             
+         }
+         closure(true)
      }
      
      public func getGroup(groupName: String, returnFormat: CelesTrakFormat, _ closure: @escaping (Bool)-> Void) {
