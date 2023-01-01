@@ -51,6 +51,7 @@ public class SwiftCelesTrak:NSObject {
          
          var requestCount = groups.count
          var isComplete = false
+         while !isComplete {
          for groupName in groups {
              let request = CelesTrakRequest(target: groupName.id)
              let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: request.getURL(objectType: .GROUP, returnFormat: returnFormat), completionHandler: { (data, response, error) in
@@ -93,8 +94,6 @@ public class SwiftCelesTrak:NSObject {
              })
              queue.addOperation(operation)
          }
-         while !isComplete {
-             
          }
          closure(true)
      }
