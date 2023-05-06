@@ -30,7 +30,7 @@ public struct CelesTrakTarget:Decodable {
     let MEAN_MOTION_DOT:Float
     let MEAN_MOTION_DDOT:Float
 
-    init( data: [String]) {
+    public init( data: [String]) {
         /** Initializer for csv format process
          Parameters:
          * data: [String]
