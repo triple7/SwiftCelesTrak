@@ -12,7 +12,7 @@ public struct CelesTrakTarget:Decodable {
      Object in Json format containing all information pertaining to a CelesTrak target
      */
 
-    let OBJECT_NAME:String
+    public let OBJECT_NAME:String
     let OBJECT_ID:String
     let EPOCH:String
     let MEAN_MOTION:Float
