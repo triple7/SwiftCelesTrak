@@ -13,22 +13,22 @@ public struct CelesTrakTarget:Decodable {
      */
 
     public let OBJECT_NAME:String
-    let OBJECT_ID:String
-    let EPOCH:String
-    let MEAN_MOTION:Float
-    let ECCENTRICITY:Float
-    let INCLINATION:Float
-    let RA_OF_ASC_NODE:Float
-    let ARG_OF_PERICENTER:Float
-    let MEAN_ANOMALY:Float
-    let EPHEMERIS_TYPE:Int
-    let CLASSIFICATION_TYPE:String
-    let NORAD_CAT_ID:Int
-    let ELEMENT_SET_NO:Int
-    let REV_AT_EPOCH:Int
-    var BSTAR:Float
-    let MEAN_MOTION_DOT:Float
-    let MEAN_MOTION_DDOT:Float
+    public let OBJECT_ID:String
+    public let EPOCH:String
+    public let MEAN_MOTION:Float
+    public let ECCENTRICITY:Float
+    public let INCLINATION:Float
+    public let RA_OF_ASC_NODE:Float
+    public let ARG_OF_PERICENTER:Float
+    public let MEAN_ANOMALY:Float
+    public let EPHEMERIS_TYPE:Int
+    public let CLASSIFICATION_TYPE:String
+    public let NORAD_CAT_ID:Int
+    public let ELEMENT_SET_NO:Int
+    public let REV_AT_EPOCH:Int
+    public var BSTAR:Float
+    public let MEAN_MOTION_DOT:Float
+    public let MEAN_MOTION_DDOT:Float
 
     public init( data: [String]) {
         /** Initializer for csv format process
