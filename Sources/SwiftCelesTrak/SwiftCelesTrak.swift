@@ -52,7 +52,7 @@ public class SwiftCelesTrak:NSObject {
 
      public func getBatchGroupTargets( groups: inout [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON, _ closure: @escaping (Bool)-> Void) {
          let queue = OperationQueue()
-         queue.maxConcurrentOperationCount = 1
+         queue.maxConcurrentOperationCount = 3
          
          var groups = groups
          var isDownloading = false
