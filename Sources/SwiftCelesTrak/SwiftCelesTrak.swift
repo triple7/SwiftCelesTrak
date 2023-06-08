@@ -49,29 +49,56 @@ public class SwiftCelesTrak:NSObject {
          let queue = OperationQueue()
          queue.maxConcurrentOperationCount = 1
          
-         var requestCount = groups.count
-         var isComplete = false
-         while !isComplete {
-         for groupName in groups {
-             let request = CelesTrakRequest(target: groupName.id)
+         var groups = groups
+         var isDownloading = false
+         var retries = [String:Int]()
+         while  !groups.isEmpty {
+             if !isDownloading {
+                 isDownloading = true
+                 let groupName = groups.removeFirst()
+                 let request = CelesTrakRequest(target: groupName.id)
              let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: request.getURL(objectType: .GROUP, returnFormat: returnFormat), completionHandler: { (data, response, error) in
                  if error != nil {
                      self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
-                     closure(false)
-                     return
+                     if let retryCount = retries[groupName.id] {
+                         if retryCount < 3 {
+                             retries[groupName.id] = retryCount + 1
+                             groups.append(groupName)
+                         }
+                     } else {
+                         retries[groupName.id] = 1
+                         groups.append(groupName)
+                     }
                  }
-                 guard let response = response as? HTTPURLResponse else {
+                 let response =  response as? HTTPURLResponse
+                 if response == nil {
                      self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out"))
-                     closure(false)
-                     return
+                     if let retryCount = retries[groupName.id] {
+                         if retryCount < 3 {
+                             retries[groupName.id] = retryCount + 1
+                             groups.append(groupName)
+                         }
+                     } else {
+                         retries[groupName.id] = 1
+                         groups.append(groupName)
+                     }
                  }
-                 if response.statusCode != 200 {
-                     let error = NSError(domain: "com.error", code: response.statusCode)
+                 if response!.statusCode != 200 {
+                     let error = NSError(domain: "com.error", code: response!.statusCode)
                      self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
-                     closure(false)
+                     if let retryCount = retries[groupName.id] {
+                         if retryCount < 3 {
+                             retries[groupName.id] = retryCount + 1
+                             groups.append(groupName)
+                         }
+                     } else {
+                         retries[groupName.id] = 1
+                         groups.append(groupName)
+                     }
                  }
 
-                 var gps:[CelesTrakTarget]
+                 var gps:[CelesTrakTarget] = []
+                 var isValidPayload = true
                  switch returnFormat {
                  case .JSON, .JSON_PRETTY:
                      gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
@@ -80,17 +107,15 @@ public class SwiftCelesTrak:NSObject {
                      gps = self.parseCsv(text: text)
                  default:
                      self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
-                     closure(false)
-                         return
+                         isValidPayload = false
                  }
-                 for gp in gps {
-                     self.targets[gp.OBJECT_ID] = gp
-                     self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
+                 if isValidPayload {
+                     for gp in gps {
+                         self.targets[gp.OBJECT_ID] = gp
+                         self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
+                     }
                  }
-                 requestCount -= 1
-                 if requestCount == 0 {
-                     isComplete = true
-                 }
+                 isDownloading = false
              })
              queue.addOperation(operation)
          }
