@@ -41,6 +41,11 @@ public class SwiftCelesTrak:NSObject {
         self.sysLog = [ CelesTrakSyslog]()
     }
     
+    public func printLogs() {
+        for log in sysLog {
+            print(log.description)
+        }
+    }
 }
 
  extension SwiftCelesTrak: URLSessionDelegate {
