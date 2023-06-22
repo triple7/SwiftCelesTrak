@@ -15,20 +15,20 @@ public struct CelesTrakTarget:Decodable {
     public let OBJECT_NAME:String
     public let OBJECT_ID:String
     public let EPOCH:String
-    public let MEAN_MOTION:Float
-    public let ECCENTRICITY:Float
-    public let INCLINATION:Float
-    public let RA_OF_ASC_NODE:Float
-    public let ARG_OF_PERICENTER:Float
-    public let MEAN_ANOMALY:Float
+    public let MEAN_MOTION:Double
+    public let ECCENTRICITY:Double
+    public let INCLINATION:Double
+    public let RA_OF_ASC_NODE:Double
+    public let ARG_OF_PERICENTER:Double
+    public let MEAN_ANOMALY:Double
     public let EPHEMERIS_TYPE:Int
     public let CLASSIFICATION_TYPE:String
     public let NORAD_CAT_ID:Int
     public let ELEMENT_SET_NO:Int
     public let REV_AT_EPOCH:Int
-    public var BSTAR:Float
-    public let MEAN_MOTION_DOT:Float
-    public let MEAN_MOTION_DDOT:Float
+    public var BSTAR:Double
+    public let MEAN_MOTION_DOT:Double
+    public let MEAN_MOTION_DDOT:Double
 
     public init( data: [String]) {
         /** Initializer for csv format process
@@ -39,20 +39,20 @@ public struct CelesTrakTarget:Decodable {
         self.OBJECT_NAME = data[0]
         self.OBJECT_ID = data[1]
         self.EPOCH = data[2]
-         self.MEAN_MOTION = Float(data[3]) ?? 0
-        self.ECCENTRICITY = Float(data[4]) ?? 0
-        self.INCLINATION = Float(data[5]) ?? 0
-        self.RA_OF_ASC_NODE = Float(data[6]) ?? 0
-        self.ARG_OF_PERICENTER = Float(data[7]) ?? 0
-        self.MEAN_ANOMALY = Float(data[8]) ?? 0
+         self.MEAN_MOTION = Double(data[3]) ?? 0
+        self.ECCENTRICITY = Double(data[4]) ?? 0
+        self.INCLINATION = Double(data[5]) ?? 0
+        self.RA_OF_ASC_NODE = Double(data[6]) ?? 0
+        self.ARG_OF_PERICENTER = Double(data[7]) ?? 0
+        self.MEAN_ANOMALY = Double(data[8]) ?? 0
         self.EPHEMERIS_TYPE = Int(data[9]) ?? 0
         self.CLASSIFICATION_TYPE = data[10]
         self.NORAD_CAT_ID = Int(data[11]) ?? 0
         self.ELEMENT_SET_NO = Int(data[12]) ?? 0
         self.REV_AT_EPOCH = Int(data[13]) ?? 0
-        self.BSTAR = Float(data[14]) ?? 0
-        self.MEAN_MOTION_DOT = Float(data[15]) ?? 0
-        self.MEAN_MOTION_DDOT = Float(data[16]) ?? 0
+        self.BSTAR = Double(data[14]) ?? 0
+        self.MEAN_MOTION_DOT = Double(data[15]) ?? 0
+        self.MEAN_MOTION_DDOT = Double(data[16]) ?? 0
     }
     
 }
