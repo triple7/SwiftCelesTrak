@@ -51,8 +51,6 @@ public class SwiftCelesTrak:NSObject {
  extension SwiftCelesTrak: URLSessionDelegate {
 
      public func getBatchGroupTargets( groups: inout [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON, _ closure: @escaping (Bool)-> Void) {
-         let queue = OperationQueue()
-         queue.maxConcurrentOperationCount = 3
          
          var groups = groups
          var isDownloading = false
@@ -63,7 +61,7 @@ public class SwiftCelesTrak:NSObject {
                  let groupName = groups.removeFirst()
                  print("Downloading \(groupName)")
                  let request = CelesTrakRequest(target: groupName.id)
-             let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: request.getURL(objectType: .GROUP, returnFormat: returnFormat), completionHandler: { (data, response, error) in
+                 URLSession.shared.dataTask( with: request.getURL(objectType: .GROUP, returnFormat: returnFormat)) { data, response, error in
                  print(response)
                  print(error)
                  if error != nil {
@@ -124,8 +122,7 @@ public class SwiftCelesTrak:NSObject {
                      }
                  }
                  isDownloading = false
-             })
-             queue.addOperation(operation)
+             }
          }
          }
          closure(true)
