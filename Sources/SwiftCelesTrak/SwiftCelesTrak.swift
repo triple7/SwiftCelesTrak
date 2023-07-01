@@ -63,6 +63,8 @@ public class SwiftCelesTrak:NSObject {
                  let groupName = groups.removeFirst()
                  let request = CelesTrakRequest(target: groupName.id)
              let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: request.getURL(objectType: .GROUP, returnFormat: returnFormat), completionHandler: { (data, response, error) in
+                 print(response)
+                 print(error)
                  if error != nil {
                      self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
                      if let retryCount = retries[groupName.id] {
