@@ -61,6 +61,7 @@ public class SwiftCelesTrak:NSObject {
              if !isDownloading {
                  isDownloading = true
                  let groupName = groups.removeFirst()
+                 print("Downloading \(groupName)")
                  let request = CelesTrakRequest(target: groupName.id)
              let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: request.getURL(objectType: .GROUP, returnFormat: returnFormat), completionHandler: { (data, response, error) in
                  print(response)
