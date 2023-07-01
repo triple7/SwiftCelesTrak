@@ -148,11 +148,7 @@ public class SwiftCelesTrak:NSObject {
      let queue = OperationQueue.main
          let session = URLSession(configuration: configuration, delegate: self, delegateQueue: queue)
          
-         print(target.getURL(objectType: .GROUP, returnFormat: .JSON))
          let task = session.dataTask(with: target.getURL(objectType: .GROUP, returnFormat: returnFormat)) { [weak self] data, response, error in
-             print("Downloaded")
-             print(error)
-             print(response)
              if error != nil {
                  self?.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
                  closure(false)
