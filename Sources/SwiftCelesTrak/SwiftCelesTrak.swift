@@ -56,7 +56,6 @@ public class SwiftCelesTrak:NSObject {
          
          var groups = groups
          var retries = [String:Int]()
-         dispatchQueue.async {
              while  !groups.isEmpty {
                      let groupName = groups.removeFirst()
                      let request = CelesTrakRequest(target: groupName.id)
@@ -133,7 +132,6 @@ public class SwiftCelesTrak:NSObject {
                          self .semaphore.signal()
                      }
                  self .semaphore.wait()
-             }
          }
      }
      
