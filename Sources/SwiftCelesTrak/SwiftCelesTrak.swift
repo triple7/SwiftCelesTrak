@@ -59,7 +59,6 @@ public class SwiftCelesTrak:NSObject {
              while  !groups.isEmpty {
                      let groupName = groups.removeFirst()
                      let request = CelesTrakRequest(target: groupName.id)
-                 print(request.getURL(objectType: .GROUP, returnFormat: .CSV).absoluteString)
                      URLSession.shared.dataTask( with: request.getURL(objectType: .GROUP, returnFormat: returnFormat)) { data, response, error in
                          if error != nil {
                              self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
@@ -119,7 +118,6 @@ public class SwiftCelesTrak:NSObject {
                              gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
                          case .CSV:
                              let text = String(decoding: data!, as: UTF8.self)
-                             print(text)
                              gps = self.parseCsv(text: text)
                          default:
                              self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
