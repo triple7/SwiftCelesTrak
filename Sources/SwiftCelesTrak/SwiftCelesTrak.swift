@@ -59,8 +59,10 @@ public class SwiftCelesTrak:NSObject {
              while  !groups.isEmpty {
                      let groupName = groups.removeFirst()
                      let request = CelesTrakRequest(target: groupName.id)
+                 print(request.getURL(objectType: .GROUP, returnFormat: .CSV).absoluteString)
                      URLSession.shared.dataTask( with: request.getURL(objectType: .GROUP, returnFormat: returnFormat)) { data, response, error in
                          if error != nil {
+                             print(error)
                              self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
                              if let retryCount = retries[groupName.id] {
                                  if retryCount < 3 {
@@ -94,6 +96,7 @@ public class SwiftCelesTrak:NSObject {
                              }
                          }
                          if response!.statusCode != 200 {
+                             print(response?.statusCode)
                              let error = NSError(domain: "com.error", code: response!.statusCode)
                              self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
                              if let retryCount = retries[groupName.id] {
@@ -118,6 +121,7 @@ public class SwiftCelesTrak:NSObject {
                              gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
                          case .CSV:
                              let text = String(decoding: data!, as: UTF8.self)
+                             print(text)
                              gps = self.parseCsv(text: text)
                          default:
                              self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
@@ -147,9 +151,10 @@ public class SwiftCelesTrak:NSObject {
          let configuration = URLSessionConfiguration.ephemeral
      let queue = OperationQueue.main
          let session = URLSession(configuration: configuration, delegate: self, delegateQueue: queue)
-         
+         print(target.getURL(objectType: .GROUP, returnFormat: .CSV).absoluteString)
          let task = session.dataTask(with: target.getURL(objectType: .GROUP, returnFormat: returnFormat)) { [weak self] data, response, error in
              if error != nil {
+                 print(error)
                  self?.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
                  closure(false)
                  return
@@ -160,6 +165,7 @@ public class SwiftCelesTrak:NSObject {
                  return
              }
              if response.statusCode != 200 {
+                 print(response.statusUnknownType)
                  let error = NSError(domain: "com.error", code: response.statusCode)
                  self?.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
                  closure(false)
