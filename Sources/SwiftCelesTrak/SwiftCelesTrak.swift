@@ -52,87 +52,17 @@ public class SwiftCelesTrak:NSObject {
 
  extension SwiftCelesTrak: URLSessionDelegate {
 
-     public func getBatchGroupTargets( groups: inout [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON) {
-         
-         var groups = groups
-         var retries = [String:Int]()
-             while  !groups.isEmpty {
-                     let groupName = groups.removeFirst()
-                     let request = CelesTrakRequest(target: groupName.id)
-                     URLSession.shared.dataTask( with: request.getURL(objectType: .GROUP, returnFormat: returnFormat)) { data, response, error in
-                         if error != nil {
-                             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
-                             if let retryCount = retries[groupName.id] {
-                                 if retryCount < 3 {
-                                     retries[groupName.id] = retryCount + 1
-                                     groups.append(groupName)
-                                     self .semaphore.signal()
-                                     return
-                                 }
-                             } else {
-                                 retries[groupName.id] = 1
-                                 groups.append(groupName)
-                                 self .semaphore.signal()
-                                 return
-                             }
-                         }
-                         let response =  response as? HTTPURLResponse
-                         if response == nil {
-                             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out"))
-                             if let retryCount = retries[groupName.id] {
-                                 if retryCount < 3 {
-                                     retries[groupName.id] = retryCount + 1
-                                     groups.append(groupName)
-                                     self .semaphore.signal()
-                                     return
-                                 }
-                             } else {
-                                 retries[groupName.id] = 1
-                                 groups.append(groupName)
-                                 self .semaphore.signal()
-                                 return
-                             }
-                         }
-                         if response!.statusCode != 200 {
-                             let error = NSError(domain: "com.error", code: response!.statusCode)
-                             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
-                             if let retryCount = retries[groupName.id] {
-                                 if retryCount < 3 {
-                                     retries[groupName.id] = retryCount + 1
-                                     groups.append(groupName)
-                                     self .semaphore.signal()
-                                     return
-                                 }
-                             } else {
-                                 retries[groupName.id] = 1
-                                 groups.append(groupName)
-                                 self .semaphore.signal()
-                                 return
-                             }
-                         }
-                         
-                         var gps:[CelesTrakTarget] = []
-                         var isValidPayload = true
-                         switch returnFormat {
-                         case .JSON, .JSON_PRETTY:
-                             gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
-                         case .CSV:
-                             let text = String(decoding: data!, as: UTF8.self)
-                             gps = self.parseCsv(text: text)
-                         default:
-                             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
-                             isValidPayload = false
-                         }
-                         if isValidPayload {
-                             for gp in gps {
-                                 self.targets[gp.OBJECT_ID] = gp
-                                 self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
-                             }
-                         }
-                         self .semaphore.signal()
-                     }
-                 self .semaphore.wait()
-         }
+     public func getBatchGroupTargets( groups: [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON) {
+         var newGroups = groups
+         let group = newGroups.removeFirst()
+         getGroup(groupName: group.rawValue, returnFormat:returnFormat, { success in
+             if success {
+                 if groups.isEmpty {
+                     return
+                 }
+                 self.getBatchGroupTargets( groups: newGroups, returnFormat: returnFormat)
+             }
+         })
      }
      
      public func getGroup(groupName: String, returnFormat: CelesTrakFormat, _ closure: @escaping (Bool)-> Void) {
