@@ -10,9 +10,13 @@ import Foundation
 extension SwiftCelesTrak {
 
 public func parseCsv(text: String)->[CelesTrakTarget] {
-    print(text)
+    var output = [CelesTrakTarget]()
         var gps = text.components(separatedBy: "\n")
         _ = gps.removeFirst()
+    for gp in gps {
+        let data = gp.components(separatedBy: ",")
+        print(gp)
+    }
         return gps.map{ CelesTrakTarget(data: $0.components(separatedBy: ","))}
     }
 
