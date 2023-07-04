@@ -165,7 +165,7 @@ public class SwiftCelesTrak:NSObject {
                  return
              }
              if response.statusCode != 200 {
-                 print(response.statusUnknownType)
+                 print(response.statusCode)
                  let error = NSError(domain: "com.error", code: response.statusCode)
                  self?.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
                  closure(false)
