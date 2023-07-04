@@ -13,10 +13,10 @@ public func parseCsv(text: String)->[CelesTrakTarget] {
     var output = [CelesTrakTarget]()
         var gps = text.components(separatedBy: "\n")
         _ = gps.removeFirst()
+    _ = gps.removeLast()
     print("GPS count \(gps.count)")
     for gp in gps {
         let data = gp.components(separatedBy: ",")
-        print(gp.count)
     }
         return gps.map{ CelesTrakTarget(data: $0.components(separatedBy: ","))}
     }
