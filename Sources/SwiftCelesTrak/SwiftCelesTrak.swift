@@ -52,17 +52,50 @@ public class SwiftCelesTrak:NSObject {
 
  extension SwiftCelesTrak: URLSessionDelegate {
 
-     public func getBatchGroupTargets( groups: [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON) {
-         var newGroups = groups
-         let group = newGroups.removeFirst()
-         getGroup(groupName: group.rawValue, returnFormat:returnFormat, { success in
-             if success {
-                 if groups.isEmpty {
-                     return
+     public func getBatchGroupTargets( groups: [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON, completion: @escaping (Bool)-> Void) {
+         let queue = OperationQueue()
+         queue.maxConcurrentOperationCount = 1
+
+         let urls = groups.map{CelesTrakRequest(target: $0.rawValue).getURL(objectType: .GROUP, returnFormat: returnFormat)}
+         for url in urls {
+             var gotError = false
+             let _ = DownloadOperation(session: URLSession.shared, dataTaskURL: url, completionHandler: { (data, response, error) in
+                 if error != nil {
+                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
+                     gotError = true
                  }
-                 self.getBatchGroupTargets( groups: newGroups, returnFormat: returnFormat)
-             }
-         })
+                 if (response as? HTTPURLResponse) == nil  {
+                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out"))
+                     gotError = true
+                 }
+                 let urlResponse = (response as! HTTPURLResponse)
+                 if urlResponse.statusCode != 200 {
+                     let error = NSError(domain: "com.error", code: urlResponse.statusCode)
+                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
+                     gotError = true
+                 }
+
+                 var gps = [CelesTrakTarget]()
+                 switch returnFormat {
+                 case .JSON, .JSON_PRETTY:
+                     gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
+                 case .CSV:
+                     let text = String(decoding: data!, as: UTF8.self)
+                     gps = self.parseCsv(text: text)
+                 default:
+                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
+                     gotError = true
+                 }
+                 if !gotError {
+                     for gp in gps {
+                         self.targets[gp.OBJECT_ID] = gp
+                         self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
+                     }
+                 }
+                 
+            })
+         }
+         completion(true)
      }
      
      public func getGroup(groupName: String, returnFormat: CelesTrakFormat, _ closure: @escaping (Bool)-> Void) {
