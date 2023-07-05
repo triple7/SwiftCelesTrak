@@ -61,8 +61,9 @@ public class SwiftCelesTrak:NSObject {
          var allDownloaded = false
          
          for (i, url) in urls.enumerated() {
+             print("\(url.absoluteString)")
              var gotError = false
-             let _ = DownloadOperation(session: URLSession.shared, dataTaskURL: url, completionHandler: { (data, response, error) in
+             let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: url, completionHandler: { (data, response, error) in
                  if error != nil {
                      self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
                      gotError = true
@@ -100,6 +101,7 @@ public class SwiftCelesTrak:NSObject {
                  }
                  
             })
+             queue.addOperation(operation)
          }
          while !allDownloaded {
              
