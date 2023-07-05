@@ -61,7 +61,6 @@ public class SwiftCelesTrak:NSObject {
          var allDownloaded = false
          
          for (i, url) in urls.enumerated() {
-             print("\(url.absoluteString)")
              var gotError = false
              let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: url, completionHandler: { (data, response, error) in
                  if error != nil {
