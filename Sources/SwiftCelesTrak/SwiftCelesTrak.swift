@@ -57,7 +57,10 @@ public class SwiftCelesTrak:NSObject {
          queue.maxConcurrentOperationCount = 1
 
          let urls = groups.map{CelesTrakRequest(target: $0.rawValue).getURL(objectType: .GROUP, returnFormat: returnFormat)}
-         for url in urls {
+         let count = urls.count - 1
+         var allDownloaded = false
+         
+         for (i, url) in urls.enumerated() {
              var gotError = false
              let _ = DownloadOperation(session: URLSession.shared, dataTaskURL: url, completionHandler: { (data, response, error) in
                  if error != nil {
@@ -92,8 +95,14 @@ public class SwiftCelesTrak:NSObject {
                          self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
                      }
                  }
+                 if i == count {
+                     allDownloaded = true
+                 }
                  
             })
+         }
+         while !allDownloaded {
+             
          }
          completion(true)
      }
