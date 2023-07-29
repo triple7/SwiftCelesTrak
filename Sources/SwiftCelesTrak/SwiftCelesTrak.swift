@@ -52,61 +52,75 @@ public class SwiftCelesTrak:NSObject {
 
  extension SwiftCelesTrak: URLSessionDelegate {
 
-     public func getBatchGroupTargets( groups: [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON, completion: @escaping (Bool)-> Void) {
-         let queue = OperationQueue()
-         queue.maxConcurrentOperationCount = 1
-
-         let urls = groups.map{CelesTrakRequest(target: $0.rawValue).getURL(objectType: .GROUP, returnFormat: returnFormat)}
-         let count = urls.count - 1
-         var allDownloaded = false
+     public func getBatchGroupTargets(groups: [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON, completion: @escaping (Bool) -> Void) {
+         let serialQueue = DispatchQueue(label: "com.yourapp.downloadQueue")
          
-         for (i, url) in urls.enumerated() {
-             var gotError = false
-             let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: url, completionHandler: { (data, response, error) in
-                 if error != nil {
-                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
-                     gotError = true
-                 }
-                 if (response as? HTTPURLResponse) == nil  {
-                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out"))
-                     gotError = true
-                 }
-                 let urlResponse = (response as! HTTPURLResponse)
-                 if urlResponse.statusCode != 200 {
-                     let error = NSError(domain: "com.error", code: urlResponse.statusCode)
-                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
-                     gotError = true
-                 }
-
-                 var gps = [CelesTrakTarget]()
-                 switch returnFormat {
-                 case .JSON, .JSON_PRETTY:
-                     gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
-                 case .CSV:
-                     let text = String(decoding: data!, as: UTF8.self)
-                     gps = self.parseCsv(text: text)
-                 default:
-                     self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
-                     gotError = true
-                 }
-                 if !gotError {
-                     for gp in gps {
-                         self.targets[gp.OBJECT_ID] = gp
-                         self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
-                     }
-                 }
-                 if i == count {
-                     allDownloaded = true
-                 }
-                 
-            })
-             queue.addOperation(operation)
-         }
-         while !allDownloaded {
+         var remainingGroups = groups
+         
+         // Create a recursive function to handle the download
+         func downloadNextGroup() {
+             guard !remainingGroups.isEmpty else {
+                 // All groups have been downloaded, call the completion handler
+                 completion(true)
+                 return
+             }
              
+             let group = remainingGroups.removeFirst()
+             let url = CelesTrakRequest(target: group.rawValue).getURL(objectType: .GROUP, returnFormat: returnFormat)
+             
+             let operation = DownloadOperation(session: URLSession.shared, dataTaskURL: url, completionHandler: { (data, response, error) in
+var gotError = false
+                           if error != nil {
+                               self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
+                               gotError = true
+                           }
+                           if (response as? HTTPURLResponse) == nil  {
+                               self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out"))
+                               gotError = true
+                           }
+                           let urlResponse = (response as! HTTPURLResponse)
+                           if urlResponse.statusCode != 200 {
+                               let error = NSError(domain: "com.error", code: urlResponse.statusCode)
+                               self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
+                               gotError = true
+                           }
+
+                           var gps = [CelesTrakTarget]()
+                           switch returnFormat {
+                           case .JSON, .JSON_PRETTY:
+                               gps = try! JSONDecoder().decode([CelesTrakTarget].self, from: data!)
+                           case .CSV:
+                               let text = String(decoding: data!, as: UTF8.self)
+                               gps = self.parseCsv(text: text)
+                           default:
+                               self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "type not available"))
+                               gotError = true
+                           }
+                           if !gotError {
+                               for gp in gps {
+                                   self.targets[gp.OBJECT_ID] = gp
+                                   self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
+                               }
+                           }
+
+                 // Call the recursive function to download the next group
+                 serialQueue.async {
+                     downloadNextGroup()
+                 }
+             })
+             
+             // Add the operation to the serial queue to execute it serially
+             serialQueue.async {
+                 operation.start()
+             }
          }
-         completion(true)
+         
+         // Start the download process by calling the recursive function
+         serialQueue.async {
+             downloadNextGroup()
+         }
      }
+
      
      public func getGroup(groupName: String, returnFormat: CelesTrakFormat, _ closure: @escaping (Bool)-> Void) {
          /** Gets a single group
