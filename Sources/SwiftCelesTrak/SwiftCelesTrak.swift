@@ -24,13 +24,14 @@ public class SwiftCelesTrak:NSObject {
      
      CelesTrak allows multiple targets in one group but requires batch processing of groups, this class serially retrieves groups, and defaults to the standard groups
      properties:
-     * targets: dictionary of targets with id as key and parameters as value
+     * targets: dictionary of targets with id as key and satellite parameters as value
      * bufferlength: progressive size of download
      * progress: progress in percentage of download for a target set
      * expectedContentLength: size in kbytes of data
      */
-    public var targets:[String: CelesTrakTarget]
-    private var buffer:Int!
+    public var targets:[String: (CelesTrakTarget, CelesTrakGroup)]
+    private var groups:[CelesTrakGroup]
+    private var buffer:Int
     public var progress:Float?
     private var expectedContentLength:Int?
     public var sysLog:[CelesTrakSyslog]
@@ -38,7 +39,8 @@ public class SwiftCelesTrak:NSObject {
     private let  semaphore =  DispatchSemaphore (value:  0 )
     
     public override init() {
-        self.targets = [String: CelesTrakTarget]()
+        self.targets = [String: (CelesTrakTarget, CelesTrakGroup)]()
+        self.groups = [CelesTrakGroup]()
         self.buffer = 0
         self.sysLog = [ CelesTrakSyslog]()
     }
@@ -53,7 +55,7 @@ public class SwiftCelesTrak:NSObject {
  extension SwiftCelesTrak: URLSessionDelegate {
 
      public func getBatchGroupTargets(groups: [CelesTrakGroup], returnFormat: CelesTrakFormat = .JSON, completion: @escaping (Bool) -> Void) {
-         let serialQueue = DispatchQueue(label: "com.yourapp.downloadQueue")
+         let serialQueue = DispatchQueue(label: "CelesTrakdownloadQueue")
          
          var remainingGroups = groups
          
@@ -98,7 +100,10 @@ var gotError = false
                            }
                            if !gotError {
                                for gp in gps {
-                                   self.targets[gp.OBJECT_ID] = gp
+                                   self.targets[gp.OBJECT_ID] = (gp, group)
+                                   if !self.groups.contains(group) {
+                                       self.groups.append(group)
+                                   }
                                    self.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
                                }
                            }
@@ -122,7 +127,7 @@ var gotError = false
      }
 
      
-     public func getGroup(groupName: String, returnFormat: CelesTrakFormat, _ closure: @escaping (Bool)-> Void) {
+     public func getGroup(groupName: CelesTrakGroup, returnFormat: CelesTrakFormat, _ closure: @escaping (Bool)-> Void) {
          /** Gets a single group
           Adds a set of targets into the targets dictionary and adds a response type for further processing
           Params:
@@ -130,7 +135,7 @@ var gotError = false
           returnFormat: type of format [Tel, Json, csv, xml]
           closure: whether request was successful
           */
-         let target = CelesTrakRequest(target: groupName)
+         let target = CelesTrakRequest(target: groupName.rawValue)
          let configuration = URLSessionConfiguration.ephemeral
      let queue = OperationQueue.main
          let session = URLSession(configuration: configuration, delegate: self, delegateQueue: queue)
@@ -165,7 +170,12 @@ var gotError = false
                      return
              }
              for gp in gps {
-                 self?.targets[gp.OBJECT_ID] = gp
+                 self?.targets[gp.OBJECT_ID] = (gp, groupName)
+                 if let hasGroup = self?.groups.contains(groupName) {
+                     if !hasGroup {
+                         self?.groups.append(groupName)
+                     }
+                 }
                  self?.sysLog.append(CelesTrakSyslog(log: .Ok, message: "\(gp.OBJECT_ID) downloaded"))
              }
          closure(true)
