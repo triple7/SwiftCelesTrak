@@ -29,7 +29,7 @@ public class SwiftCelesTrak:NSObject {
      * progress: progress in percentage of download for a target set
      * expectedContentLength: size in kbytes of data
      */
-    public var targets:[String: (CelesTrakTarget, CelesTrakGroup)]
+    public var targets:[String: (_target: CelesTrakTarget, _group: CelesTrakGroup)]
     private var groups:[CelesTrakGroup]
     private var buffer:Int
     public var progress:Float?
