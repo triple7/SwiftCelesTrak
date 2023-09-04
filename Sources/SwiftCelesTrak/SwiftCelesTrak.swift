@@ -45,6 +45,16 @@ public class SwiftCelesTrak:NSObject {
         self.sysLog = [ CelesTrakSyslog]()
     }
     
+    public func getTargets( _ group: CelesTrakGroup)->[CelesTrakTarget] {
+        var output = [CelesTrakTarget]()
+        for t in self.targets.values {
+            if t._group == group {
+                output.append(t._target)
+            }
+        }
+        return output
+    }
+
     public func printLogs() {
         for log in sysLog {
             print(log.description)
