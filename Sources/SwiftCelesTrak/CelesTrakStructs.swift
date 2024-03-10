@@ -57,6 +57,10 @@ public struct CelesTrakTarget:Decodable {
         self.MEAN_MOTION_DDOT = Double(data[16]) ?? 0
     }
     
+    public mutating func setActive(active: Bool) {
+        self.active = active
+    }
+    
 }
 
 public struct CelesTrakRequest {
