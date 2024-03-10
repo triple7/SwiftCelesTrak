@@ -35,8 +35,6 @@ public class SwiftCelesTrak:NSObject {
     public var progress:Float?
     private var expectedContentLength:Int?
     public var sysLog:[CelesTrakSyslog]
-    private let  dispatchQueue =  DispatchQueue (label:  "celestrak" , qos: .background)
-    private let  semaphore =  DispatchSemaphore (value:  0 )
     
     public override init() {
         self.targets = [String: (CelesTrakTarget, CelesTrakGroup)]()

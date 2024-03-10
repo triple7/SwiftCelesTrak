@@ -29,6 +29,8 @@ public struct CelesTrakTarget:Decodable {
     public var BSTAR:Double
     public let MEAN_MOTION_DOT:Double
     public let MEAN_MOTION_DDOT:Double
+    // Used for filtering, not part of Celestrak service payload
+    public var active:Bool?
 
     public init( data: [String]) {
         /** Initializer for csv format process
