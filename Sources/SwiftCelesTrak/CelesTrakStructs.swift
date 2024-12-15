@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct CelesTrakTarget:Decodable {
+public struct CelesTrakTarget:Codable {
     /** CelesTrak target result
      Object in Json format containing all information pertaining to a CelesTrak target
      */
