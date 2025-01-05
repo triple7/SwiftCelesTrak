@@ -17,8 +17,8 @@ extension SwiftCelesTrak {
             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
             gotError = true
         }
-        if (response as? HTTPURLResponse) == nil {
-            self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out"))
+        if (response == nil || response as? HTTPURLResponse) == nil {
+            self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out or no connection"))
             gotError = true
         }
         let urlResponse = (response as! HTTPURLResponse)
@@ -27,7 +27,6 @@ extension SwiftCelesTrak {
             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
             gotError = true
         }
-        print("checking data")
         if !gotError {
             if data == nil {
                 self.sysLog.append(CelesTrakSyslog(log: .DataCorrupted, message: "Data was nil, potential throttle"))
