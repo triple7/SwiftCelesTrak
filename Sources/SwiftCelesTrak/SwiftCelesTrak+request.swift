@@ -12,7 +12,6 @@ extension SwiftCelesTrak {
     /** request returned data check
      */
     private func requestIsValid(message: String, error: Error?, response: URLResponse?, data: Data?) -> Bool {
-        print("requestIsValid: \(message) \(error) \(response) \(data)")
         var gotError = false
         if error != nil {
             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
@@ -28,6 +27,7 @@ extension SwiftCelesTrak {
             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
             gotError = true
         }
+        print("checking data")
         if !gotError {
             if data == nil {
                 self.sysLog.append(CelesTrakSyslog(log: .DataCorrupted, message: "Data was nil, potential throttle"))
