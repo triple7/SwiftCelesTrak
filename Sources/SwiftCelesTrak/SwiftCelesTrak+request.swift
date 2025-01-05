@@ -17,14 +17,19 @@ extension SwiftCelesTrak {
             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error!.localizedDescription))
             gotError = true
         }
-        if (response == nil || response as? HTTPURLResponse) == nil {
+        if (response as? HTTPURLResponse) == nil {
             self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out or no connection"))
             gotError = true
         }
-        let urlResponse = (response as! HTTPURLResponse)
-        if urlResponse.statusCode != 200 {
-            let error = NSError(domain: "com.error", code: urlResponse.statusCode)
-            self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
+        if let response = response {
+            let urlResponse = (response as! HTTPURLResponse)
+            if urlResponse.statusCode != 200 {
+                let error = NSError(domain: "com.error", code: urlResponse.statusCode)
+                self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: error.localizedDescription))
+                gotError = true
+            }
+        } else {
+            self.sysLog.append(CelesTrakSyslog(log: .RequestError, message: "response timed out or no connection"))
             gotError = true
         }
         if !gotError {
