@@ -81,6 +81,8 @@ extension SwiftCelesTrak {
                     serialQueue.async {
                         downloadNextGroup()
                     }
+                } else {
+                    self.printLogs()
                 }
             })
             
